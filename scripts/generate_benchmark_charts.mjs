@@ -12,11 +12,11 @@ const hd = data.some(row => row.width === '1920' && row.height === '1080');
 const [width, height] = hd ? ['1920', '1080'] : ['512', '512'];
 const rows = data.filter(row => row.width === width && row.height === height);
 const series = [
-    { method: 'naive_2d', label: 'Naive 2D', color: '#5c6270', threads: 1 },
-    { method: 'separable', label: 'Separable', color: '#087e70', threads: 1 },
-    { method: 'threaded_2d', label: 'Threaded 2D', color: '#a45400' },
-    { method: 'separable_threaded', label: 'Threaded separable', color: '#255ba6' },
-    { method: 'separable_reuse', label: 'Separable with reuse', color: '#78439a' },
+    { method: 'naive_2d', label: 'Naive 2D', color: '#909ba8', threads: 1 },
+    { method: 'separable', label: 'Separable', color: '#78a99b', threads: 1 },
+    { method: 'threaded_2d', label: 'Threaded 2D', color: '#c99b79' },
+    { method: 'separable_threaded', label: 'Threaded separable', color: '#829fc4' },
+    { method: 'separable_reuse', label: 'Separable with reuse', color: '#ad94b9' },
 ];
 
 const threadCount = Math.max(...rows.filter(row => row.method === 'threaded_2d')

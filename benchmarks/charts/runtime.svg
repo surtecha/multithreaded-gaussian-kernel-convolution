@@ -15,19 +15,19 @@
 <line x1="705" y1="80" x2="705" y2="310" stroke="#d9dee6"/>
 <text x="705" y="332" text-anchor="middle">800</text>
 <text x="193" y="110" text-anchor="end">Naive 2D · 1T</text>
-<rect x="205" y="94" width="369.1640375" height="24" rx="2" fill="#5c6270"/>
+<rect x="205" y="94" width="369.1640375" height="24" rx="2" fill="#909ba8"/>
 <text x="582.1640375" y="110" >590.66</text>
 <text x="193" y="154" text-anchor="end">Separable · 1T</text>
-<rect x="205" y="138" width="46.422890625" height="24" rx="2" fill="#087e70"/>
+<rect x="205" y="138" width="46.422890625" height="24" rx="2" fill="#78a99b"/>
 <text x="259.42289062500004" y="154" >74.28</text>
 <text x="193" y="198" text-anchor="end">Threaded 2D · 8T</text>
-<rect x="205" y="182" width="61.734895625" height="24" rx="2" fill="#a45400"/>
+<rect x="205" y="182" width="61.734895625" height="24" rx="2" fill="#c99b79"/>
 <text x="274.734895625" y="198" >98.78</text>
 <text x="193" y="242" text-anchor="end">Threaded separable · 8T</text>
-<rect x="205" y="226" width="10.068645624999998" height="24" rx="2" fill="#255ba6"/>
+<rect x="205" y="226" width="10.068645624999998" height="24" rx="2" fill="#829fc4"/>
 <text x="223.068645625" y="242" >16.11</text>
 <text x="193" y="286" text-anchor="end">Separable with reuse · 8T</text>
-<rect x="205" y="270" width="9.743281249999999" height="24" rx="2" fill="#78439a"/>
+<rect x="205" y="270" width="9.743281249999999" height="24" rx="2" fill="#ad94b9"/>
 <text x="222.74328125" y="286" >15.59</text>
 <text x="455" y="354" text-anchor="middle">Median runtime (ms)</text>
 </g>

@@ -89,7 +89,7 @@ The [full CSV](benchmarks/data/benchmark.csv) reports mean, median, minimum and 
 
 ![Animated reveal of measured 4K speedups from 1.00× for naive 2D to 66.60× with eight threads and buffer reuse](benchmarks/charts/speedup-progress.gif)
 
-The animation reveals measured median runtimes one implementation at a time. The bars show speedup relative to naive 2D. [Benchmark data](benchmarks/data/benchmark.csv)
+The bars show speedup relative to naive 2D. Each implementation uses the same color across all three charts. [Benchmark data](benchmarks/data/benchmark.csv)
 
 ![Median runtime by convolution implementation for a 1920 by 1080 image and an 11 by 11 kernel](benchmarks/charts/runtime.svg)
 
