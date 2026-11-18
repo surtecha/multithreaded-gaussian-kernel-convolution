@@ -25,6 +25,10 @@ add_library(stb OBJECT src/stb.cpp)
 target_include_directories(stb PRIVATE third_party)
 target_link_libraries(gaussian PRIVATE stb)
 
+add_executable(gaussian_bench src/main.cpp)
+target_link_libraries(gaussian_bench PRIVATE gaussian)
+project_warnings(gaussian_bench)
+
 if(BUILD_TESTING)
     add_executable(gaussian_tests tests/test_convolution.cpp)
     target_link_libraries(gaussian_tests PRIVATE gaussian)
