@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="370" viewBox="0 0 780 370" role="img" aria-labelledby="title">
+<title id="title">Runtime by implementation</title>
+<rect width="780" height="370" fill="#fff"/>
+<g font-family="system-ui, sans-serif" font-size="13" fill="#222b38">
+<text x="26" y="32" font-size="22" font-weight="650">Runtime by implementation</text>
+<text x="26" y="56" >1920 × 1080 RGB · 11 × 11 kernel · lower is faster</text>
+<line x1="205" y1="80" x2="205" y2="310" stroke="#d9dee6"/>
+<text x="205" y="332" text-anchor="middle">0</text>
+<line x1="330" y1="80" x2="330" y2="310" stroke="#d9dee6"/>
+<text x="330" y="332" text-anchor="middle">200</text>
+<line x1="455" y1="80" x2="455" y2="310" stroke="#d9dee6"/>
+<text x="455" y="332" text-anchor="middle">400</text>
+<line x1="580" y1="80" x2="580" y2="310" stroke="#d9dee6"/>
+<text x="580" y="332" text-anchor="middle">600</text>
+<line x1="705" y1="80" x2="705" y2="310" stroke="#d9dee6"/>
+<text x="705" y="332" text-anchor="middle">800</text>
+<text x="193" y="110" text-anchor="end">Naive 2D · 1T</text>
+<rect x="205" y="94" width="369.1640375" height="24" rx="2" fill="#5c6270"/>
+<text x="582.1640375" y="110" >590.66</text>
+<text x="193" y="154" text-anchor="end">Separable · 1T</text>
+<rect x="205" y="138" width="46.422890625" height="24" rx="2" fill="#087e70"/>
+<text x="259.42289062500004" y="154" >74.28</text>
+<text x="193" y="198" text-anchor="end">Threaded 2D · 8T</text>
+<rect x="205" y="182" width="61.734895625" height="24" rx="2" fill="#a45400"/>
+<text x="274.734895625" y="198" >98.78</text>
+<text x="193" y="242" text-anchor="end">Threaded separable · 8T</text>
+<rect x="205" y="226" width="10.068645624999998" height="24" rx="2" fill="#255ba6"/>
+<text x="223.068645625" y="242" >16.11</text>
+<text x="193" y="286" text-anchor="end">Separable with reuse · 8T</text>
+<rect x="205" y="270" width="9.743281249999999" height="24" rx="2" fill="#78439a"/>
+<text x="222.74328125" y="286" >15.59</text>
+<text x="455" y="354" text-anchor="middle">Median runtime (ms)</text>
+</g>
+</svg>
