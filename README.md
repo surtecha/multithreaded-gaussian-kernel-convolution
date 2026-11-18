@@ -2,7 +2,11 @@
 
 ## Overview
 
-This project compares five CPU implementations of Gaussian filtering on 8-bit images. The direct 2D convolution provides a reference. Separable filtering reduces the amount of work, row parallelism distributes that work across CPU threads, and a reusable buffer path measures the cost of allocating image storage on each call.
+Five C++ implementations show how Gaussian blur gets faster as separable filtering, row parallelism, and buffer reuse build on a direct 2D reference.
+
+On an Apple M3 Pro, the median for a 4K RGB image and a 15 × 15 kernel fell from **4,891.76 ms to 73.45 ms** with eight threads and reusable buffers, a **66.60× speedup**. The parallel version with allocation included took **74.11 ms**.
+
+[Performance charts](#performance-charts), [image comparison](#visual-results), and [build instructions](#build-instructions).
 
 ## Why Gaussian convolution?
 
@@ -24,15 +28,15 @@ A Gaussian filter smooths an image by weighting nearby samples according to dist
 
 **Separable.** For normalized sampled Gaussian weights `g`, the 2D weight at offset `(x, y)` is `g[x] * g[y]`. Both passes together read `2K` samples per pixel and channel. That reduces the work to O(W × H × K), from 225 to 30 taps per channel at K = 15. The horizontal pass writes floating-point samples. The vertical pass reads them and quantizes the final output once. All methods replicate the nearest edge sample outside the image and round the clamped output to the nearest 8-bit value, with ties rounded up.
 
-**Row parallelism.** Threads share the read-only input and write contiguous, disjoint output row ranges. Any leftover rows are distributed one per range until assigned. The calling thread handles one range while the remaining ranges run on `std::thread` workers. Joining the first pass makes its intermediate rows available to every worker in the second pass. One thread uses the calling thread directly. The library rejects nonpositive counts and caps the number of ranges at the image height.
+**Row parallelism.** Threads share the read-only input and write disjoint row ranges. Ranges differ in size by at most one row. The calling thread handles one range and joins the other workers before the next pass can read their output. The library rejects nonpositive thread counts and caps the number of ranges at the image height.
 
-**Memory work.** The original implementations initialized temporary images by copying the source. The current implementations allocate fresh output storage. Separable filtering still traverses an additional full-size intermediate, using four bytes per channel sample. Reusing both buffers removes per-call image-buffer allocation and initialization after setup. It still performs the same two passes, launches the same workers, and moves the same pixel samples.
+**Buffer reuse.** The original implementation initialized temporary images by copying the source. Separable filtering now uses fresh output storage and a floating-point intermediate with four bytes per channel sample. Reusing both buffers skips per-call allocation and initialization while preserving the same two passes and worker launches.
 
 ## Performance results
 
 ### Original benchmark
 
-The supplied implementation built with both stb headers already present. A [fresh baseline run](benchmarks/data/baseline/original-512.csv) used a 512 × 512 RGB resize, two warmups and five timed runs. The original direct method averaged 5.70, 13.81 and 82.82 ms at K = 3, 5 and 11. The original implementation truncated the horizontal result to 8 bits before the vertical pass. The [supplied historical CSV](benchmarks/data/baseline/original-historical.csv) is also preserved. These runs used different inputs and timing summaries from the final sweep. The legacy GB/s column estimated input and output buffer traffic.
+The original direct method averaged 5.70, 13.81, and 82.82 ms at kernel widths 3, 5, and 11 on a 512 × 512 RGB resize. The original separable method truncated the horizontal result to 8 bits. These records used different inputs and timing summaries from the final sweep. [Original 512 × 512 benchmark](benchmarks/data/baseline/original-512.csv) and [historical CSV](benchmarks/data/baseline/original-historical.csv).
 
 ### Reproducible sweep
 
@@ -60,9 +64,6 @@ The [full CSV](benchmarks/data/benchmark.csv) reports mean, median, minimum and 
 | 1920 × 1080 | 11 × 11 | Multithreaded separable | 8 | 16.11 | 36.66× |
 | 1920 × 1080 | 11 × 11 | Separable with buffer reuse | 8 | 15.59 | 37.89× |
 
-The largest measured speedup was 66.60× at 3840 × 2160 with a 15 × 15 kernel and eight threads. The reused-buffer path took 73.45 ms, and the allocating path took 74.11 ms for a 66.00× speedup. The naive median was 4,891.76 ms.
-
-
 ## Performance charts
 
 ![Median runtime by convolution implementation for a 1920 by 1080 image and an 11 by 11 kernel](benchmarks/charts/runtime.svg)
@@ -73,7 +74,7 @@ The largest measured speedup was 66.60× at 3840 × 2160 with a 15 × 15 kernel 
 
 The synthetic RGB pattern combines hard edges, narrow stripes and deterministic grain. The result uses a 15 × 15 Gaussian with sigma 2.5 and four threads.
 
-| Original | Blurred |
+| Original pattern | Gaussian blur |
 | --- | --- |
 | ![Original geometric pattern with grain](examples/pattern.png) | ![Gaussian-blurred geometric pattern](examples/pattern-blur.png) |
 
@@ -111,7 +112,7 @@ The C++ test executable checks normalized symmetric kernels, invalid sizes and s
 ## Technical observations
 
 - **Kernel size.** At 1920 × 1080, the naive median rose from 43.11 ms at K = 3 to 1,228.57 ms at K = 15. Single-threaded separability went from 1.49× to 12.09× speedup as the gap between K² and 2K grew.
-- **Thread scaling.** At 1920 × 1080 and K = 11, direct convolution improved from 314.58 ms with two threads to 163.90 ms with four and 98.78 ms with eight. Threaded separable filtering went from 20.13 ms at four threads to 16.11 ms at eight, a 1.25× gain. Each parallel configuration improved through eight threads. Higher counts were outside this sweep. Worker creation and barrier costs take a larger fraction of runtime on smaller jobs.
+- **Thread scaling.** At 1920 × 1080 and K = 11, going from four threads to eight improved direct convolution by 1.66× and separable filtering by 1.25×. Each parallel method improved through eight threads, the largest count tested. Worker creation and barrier costs take a larger fraction of runtime on smaller jobs.
 - **Buffer reuse.** At 1920 × 1080, K = 11 and eight threads, reuse reduced the median from 16.11 to 15.59 ms, about 3.2%. At 512 × 512 and K = 11 it was about 1.0% slower in the recorded run. Short allocation and scheduling differences can be comparable to the effect being measured. The reusable intermediate occupies about 95 MiB at 4K RGB.
 - **Precision.** Retaining floating-point intermediates avoids quantization between passes. Different accumulation order can move a final sample across a rounding threshold. The CSV records this difference in final 8-bit intensity levels.
 
