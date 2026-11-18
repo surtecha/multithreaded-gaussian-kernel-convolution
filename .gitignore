@@ -1,0 +1,7 @@
+/build/
+/build-*/
+/gaussian_bench
+/test.png
+/kernelconv-main.bundle
+/results/out_k*.png
+.DS_Store
