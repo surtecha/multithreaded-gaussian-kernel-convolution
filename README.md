@@ -1,12 +1,33 @@
 # Gaussian Convolution in C++: From Naive Implementation to Parallel Optimization
 
-## Overview
+[![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus&logoColor=white)](CMakeLists.txt)
+[![CMake](https://img.shields.io/badge/CMake-3.16%2B-064F8C?logo=cmake&logoColor=white)](CMakeLists.txt)
+[![CPU multithreading](https://img.shields.io/badge/CPU-Multithreading-285B61)](#implementations)
+[![Benchmarks](https://img.shields.io/badge/Benchmarks-4K-456174)](#performance-charts)
 
-Five C++ implementations show how Gaussian blur gets faster as separable filtering, row parallelism, and buffer reuse build on a direct 2D reference.
+Five C++ implementations of Gaussian blur, from a direct 2D reference to separable filtering with row parallelism and buffer reuse.
+
+| Original pattern | Gaussian blur |
+| --- | --- |
+| ![Original geometric pattern with grain](examples/pattern.png) | ![The same pattern after Gaussian blur](examples/pattern-blur.png) |
+
+The blur uses a 15 × 15 kernel with sigma 2.5.
 
 On an Apple M3 Pro, the median for a 4K RGB image and a 15 × 15 kernel fell from **4,891.76 ms to 73.45 ms** with eight threads and reusable buffers, a **66.60× speedup**. The parallel version with allocation included took **74.11 ms**.
 
-[Performance charts](#performance-charts), [image comparison](#visual-results), and [build instructions](#build-instructions).
+[Quick start](#quick-start) · [Performance charts](#performance-charts) · [Benchmark data](benchmarks/data/benchmark.csv)
+
+## Quick start
+
+CMake 3.16 or newer and a C++17 compiler are required.
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+./build/gaussian_bench blur examples/pattern.png build/pattern-blur.png 15 2.5 4 separable_threaded
+```
+
+The arguments after the input and output paths are kernel width, sigma, thread count, and method. With a multi-configuration generator, use `build/Release/gaussian_bench`.
 
 ## Why Gaussian convolution?
 
@@ -66,40 +87,22 @@ The [full CSV](benchmarks/data/benchmark.csv) reports mean, median, minimum and 
 
 ## Performance charts
 
+![Animated reveal of measured 4K speedups from 1.00× for naive 2D to 66.60× with eight threads and buffer reuse](benchmarks/charts/speedup-progress.gif)
+
+The animation reveals measured median runtimes one implementation at a time. The bars show speedup relative to naive 2D. [Benchmark data](benchmarks/data/benchmark.csv)
+
 ![Median runtime by convolution implementation for a 1920 by 1080 image and an 11 by 11 kernel](benchmarks/charts/runtime.svg)
 
 ![Median speedup relative to the naive baseline across four kernel sizes](benchmarks/charts/speedup.svg)
 
-## Visual results
-
-The synthetic RGB pattern combines hard edges, narrow stripes and deterministic grain. The result uses a 15 × 15 Gaussian with sigma 2.5 and four threads.
-
-| Original pattern | Gaussian blur |
-| --- | --- |
-| ![Original geometric pattern with grain](examples/pattern.png) | ![Gaussian-blurred geometric pattern](examples/pattern-blur.png) |
-
-## Build instructions
-
-CMake 3.16 or newer and a C++17 compiler are required. The stb headers are bundled.
+## Run the benchmarks
 
 ```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
-```
-
-## Usage
-
-Published measurements and charts live in `benchmarks/`, and the example images live in `examples/`. These commands write fresh outputs to `build/`.
-
-```sh
-./build/gaussian_bench blur examples/pattern.png build/pattern-blur.png 15 2.5 4 separable_threaded
 ./build/gaussian_bench benchmark build/benchmark.csv 5 2 4k
 node scripts/generate_benchmark_charts.mjs build/benchmark.csv build/charts
 ```
 
-The `blur` arguments are input path, output PNG path, kernel side, sigma, thread count and method. Sigma defaults to K / 6, the thread count defaults to 1 and the method defaults to `separable_threaded`. Method names are `naive_2d`, `separable`, `threaded_2d`, `separable_threaded` and `separable_reuse`. Buffer reuse applies to repeated calls through the library API or benchmark runner. A single `blur` command still prepares its buffers.
-
-The benchmark defaults to five runs, two warmups and `standard`, which runs through 1920 × 1080. The `quick` mode limits the sweep to 512 × 512. Node.js is only required to regenerate the SVG charts. With multi-configuration CMake generators, executables are typically in `build/Release`.
+The benchmark command above uses five timed runs and two warmups per configuration. Use `quick` for 512 × 512 or `standard` for resolutions up to 1920 × 1080. Node.js is only needed to regenerate the SVG charts.
 
 ## Testing
 
