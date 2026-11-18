@@ -32,7 +32,7 @@ A Gaussian filter smooths an image by weighting nearby samples according to dist
 
 ### Original benchmark
 
-The supplied implementation built with both stb headers already present. A [fresh baseline run](results/original-512.csv) used a 512 × 512 RGB resize, two warmups and five timed runs. The original direct method averaged 5.70, 13.81 and 82.82 ms at K = 3, 5 and 11. The original implementation truncated the horizontal result to 8 bits before the vertical pass. The [supplied historical CSV](results/original-historical.csv) is also preserved. These runs used different inputs and timing summaries from the final sweep. The legacy GB/s column estimated input and output buffer traffic.
+The supplied implementation built with both stb headers already present. A [fresh baseline run](benchmarks/data/baseline/original-512.csv) used a 512 × 512 RGB resize, two warmups and five timed runs. The original direct method averaged 5.70, 13.81 and 82.82 ms at K = 3, 5 and 11. The original implementation truncated the horizontal result to 8 bits before the vertical pass. The [supplied historical CSV](benchmarks/data/baseline/original-historical.csv) is also preserved. These runs used different inputs and timing summaries from the final sweep. The legacy GB/s column estimated input and output buffer traffic.
 
 ### Reproducible sweep
 
@@ -40,7 +40,7 @@ The runner generates deterministic RGB inputs at 512 × 512, 1024 × 1024, 1920 
 
 `std::chrono::steady_clock` times the convolution calls. Input creation, image I/O, kernel generation, reference comparisons and final output destruction sit outside the timing window. Versions 1 through 4 include output allocation, and versions 2 and 4 also include intermediate allocation. Version 5 uses buffers prepared before the timer. Thread launch and joining are included for every parallel run.
 
-The [full CSV](results/benchmark.csv) reports mean, median, minimum and population standard deviation in milliseconds. Throughput and speedup use the median. Speedup divides the single-threaded naive median by the method median for the same resolution and kernel. The error columns compare each method's first warmup output with the naive result.
+The [full CSV](benchmarks/data/benchmark.csv) reports mean, median, minimum and population standard deviation in milliseconds. Throughput and speedup use the median. Speedup divides the single-threaded naive median by the method median for the same resolution and kernel. The error columns compare each method's first warmup output with the naive result.
 
 | Measurement environment | Value |
 | --- | --- |
@@ -65,9 +65,9 @@ The largest measured speedup was 66.60× at 3840 × 2160 with a 15 × 15 kernel 
 
 ## Performance charts
 
-![Median runtime by convolution implementation for a 1920 by 1080 image and an 11 by 11 kernel](results/charts/runtime.svg)
+![Median runtime by convolution implementation for a 1920 by 1080 image and an 11 by 11 kernel](benchmarks/charts/runtime.svg)
 
-![Median speedup relative to the naive baseline across four kernel sizes](results/charts/speedup.svg)
+![Median speedup relative to the naive baseline across four kernel sizes](benchmarks/charts/speedup.svg)
 
 ## Visual results
 
@@ -75,7 +75,7 @@ The synthetic RGB pattern combines hard edges, narrow stripes and deterministic 
 
 | Original | Blurred |
 | --- | --- |
-| ![Original geometric pattern with grain](assets/input/pattern.png) | ![Gaussian-blurred geometric pattern](results/examples/pattern-blur.png) |
+| ![Original geometric pattern with grain](examples/pattern.png) | ![Gaussian-blurred geometric pattern](examples/pattern-blur.png) |
 
 ## Build instructions
 
@@ -88,10 +88,12 @@ cmake --build build --config Release
 
 ## Usage
 
+Published measurements and charts live in `benchmarks/`, and the example images live in `examples/`. These commands write fresh outputs to `build/`.
+
 ```sh
-./build/gaussian_bench blur assets/input/pattern.png results/examples/pattern-blur.png 15 2.5 4 separable_threaded
-./build/gaussian_bench benchmark results/benchmark.csv 5 2 4k
-node scripts/generate_benchmark_charts.mjs results/benchmark.csv results/charts
+./build/gaussian_bench blur examples/pattern.png build/pattern-blur.png 15 2.5 4 separable_threaded
+./build/gaussian_bench benchmark build/benchmark.csv 5 2 4k
+node scripts/generate_benchmark_charts.mjs build/benchmark.csv build/charts
 ```
 
 The `blur` arguments are input path, output PNG path, kernel side, sigma, thread count and method. Sigma defaults to K / 6, the thread count defaults to 1 and the method defaults to `separable_threaded`. Method names are `naive_2d`, `separable`, `threaded_2d`, `separable_threaded` and `separable_reuse`. Buffer reuse applies to repeated calls through the library API or benchmark runner. A single `blur` command still prepares its buffers.

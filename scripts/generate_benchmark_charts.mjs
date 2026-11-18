@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const [csv = 'results/benchmark.csv', output = 'results/charts'] = process.argv.slice(2);
+const [csv = 'benchmarks/data/benchmark.csv', output = 'benchmarks/charts'] = process.argv.slice(2);
 const [header, ...lines] = readFileSync(csv, 'utf8').trim().split(/\r?\n/);
 const columns = header.split(',');
 const data = lines.map(line => Object.fromEntries(
